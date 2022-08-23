@@ -30,16 +30,18 @@ class RegistrationController extends AbstractController
     #[Route('/register', name: 'app_register')]
     public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, UserAuthenticatorInterface $userAuthenticator, LoginFormAuthenticator $authenticator, EntityManagerInterface $entityManager): Response
     {
-        $user = new User();
-        $form = $this->createForm(RegistrationFormType::class, $user);
-        $form->handleRequest($request);
+        if ($this->getUser()) {
+            return $this->redirectToRoute('products_index');
+        }
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($request->getMethod() === "POST") {
+            $user = new User();
+            $user->setEmail($request->request->get('email'));
             // encode the plain password
             $user->setPassword(
                 $userPasswordHasher->hashPassword(
                     $user,
-                    $form->get('plainPassword')->getData()
+                    $request->request->get('password')
                 )
             );
 
@@ -63,9 +65,7 @@ class RegistrationController extends AbstractController
             );
         }
 
-        return $this->render('registration/register.html.twig', [
-            'registrationForm' => $form->createView(),
-        ]);
+        return $this->render('security/register.html.twig');
     }
 
     #[Route('/verify/email', name: 'app_verify_email')]
