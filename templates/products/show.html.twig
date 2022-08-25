@@ -7,5 +7,37 @@
         <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
     {% endfor %}
 
-    <h1>Product {{ productId }}</h1>
+    <div class="max-w-4xl bg-white w-full mx-auto text-center my-16 p-16 border border-gray-100 rounded-2xl shadow-xl">
+        <h1 class="text-3xl">{{ product.name }}</h1>
+        <div class="flex items-center justify-center w-2/3 mx-auto mt-3">
+            <img src="/uploads/images/{{ product.filename }}" class="w-full p-3 bg-white rounded-md " loading="lazy" alt="{{ product.filename }}">
+        </div>
+        <div class="text-xl p-6">
+            <p>
+                <i class="fa-solid fa-gauge-simple-high"></i>
+                {{ product.maxSpeed }} km/h
+            </p>
+            <p>
+                <i class="fa-solid fa-money-bill"></i>
+                {{ product.price }} e/h
+            </p>
+        </div>
+        {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+            {% if app.user.isVerified is same as true %}
+                <div class="text-3xl border border-primary-600 w-auto md:w-1/2 w-auto mx-auto rounded-2xl py-2">
+                    <a href="tel:+381648243132">+38164824313</a>
+                </div>
+            {% else %}
+                <div class="text-3xl border border-primary-600 w-auto md:w-1/2 w-auto mx-auto rounded-2xl py-2">
+                    <button class="opacity-50 cursor-not-allowed">Show phone number</button>
+                </div>
+                <p class="mt-6">Your account must be activated to see the phone number.</p>
+            {% endif %}
+        {% else %}
+            <div class="text-3xl border border-primary-600 w-auto md:w-1/2 w-auto mx-auto rounded-2xl py-2">
+                <a href="/force-login?redirect={{ product.id }}">Show phone number</a>
+            </div>
+            <p class="mt-6">You must logged in to see our phone number.</p>
+        {% endif %}
+    </div>
 {% endblock %}

@@ -98,7 +98,7 @@ class ResetPasswordController extends AbstractController
             return $this->redirectToRoute('app_forgot_password_request');
         }
 
-        if ($request->getMethod() === "POST") {
+        if ($request->getMethod() === "POST" && $this->checkPassword($request)) {
             // A password reset token should be used only once, remove it.
             $this->resetPasswordHelper->removeResetRequest($token);
 
@@ -113,7 +113,7 @@ class ResetPasswordController extends AbstractController
 
             // The session is cleaned up after the password has been changed.
             $this->cleanSessionAfterReset();
-            $this->addFlash('success', 'Your password changed, you can login noew.');
+            $this->addFlash('success', 'Your password changed, you can login now.');
 
             return $this->redirectToRoute('app_login');
         }
@@ -149,8 +149,8 @@ class ResetPasswordController extends AbstractController
         }
 
         $email = (new TemplatedEmail())
-            ->from(new Address('dajana@yahoo.com', 'sziamia'))
-            ->to('tmshrvt758@gmail.com')
+            ->from(new Address('business.stuffs.email@gmail.com', 'Rent a bike'))
+            ->to($user->getEmail())
             ->subject('Your password reset request')
             ->htmlTemplate('reset_password/email.html.twig')
             ->context([
@@ -164,5 +164,23 @@ class ResetPasswordController extends AbstractController
         $this->setTokenObjectInSession($resetToken);
 
         return $this->redirectToRoute('app_check_email');
+    }
+
+    private function checkPassword(Request $request): bool
+    {
+        $password = $request->request->get('password');
+        $passwordVerified = $request->request->get('passwordVerify');
+
+        if ($password !== $passwordVerified) {
+            $this->addFlash('success', 'Passwords are not same.');
+            return false;
+        }
+
+        if (strlen($password) < 8) {
+            $this->addFlash('success', 'Password is too short.');
+            return false;
+        }
+
+        return true;
     }
 }

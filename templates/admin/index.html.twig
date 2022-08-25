@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Administration{% endblock %}
+
+{% block body %}
+    <div class="max-w-4xl w-full mx-auto text-center my-32 rounded-2xl shadow-xl">
+        <h1 class="my-6 text-3xl">Administration</h1>
+        <div class="overflow-x-auto relative shadow-md sm:rounded-lg">
+            <table class="w-full text-sm text-left text-gray-500 " id="dashboard">
+                <thead class="text-bs text-gray-700 uppercase bg-gray-50 border border-4">
+                <tr>
+                    <th scope="col" class="py-3 px-6">
+                        Product name
+                    </th>
+                    <th scope="col" class="py-3 px-6">
+                        Max speed
+                    </th>
+                    <th scope="col" class="py-3 px-6">
+                        Price
+                    </th>
+                    <th scope="col" class="py-3 px-6">
+                        Actions
+                    </th>
+                    <th>
+                        <a href="{{ path('admin_insert') }}" class="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Add new</a>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for product in products %}
+                    <tr id="row-{{ product.id }}" class="bg-white border-b dark:bg-gray-900 dark:border-gray-700">
+                        <th scope="row" class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            {{ product.name }}
+                        </th>
+                        <td class="py-4 px-6">
+                            {{ product.maxSpeed }} km/h
+                        </td>
+                        <td class="py-4 px-6">
+                            {{ product.price }} e/h
+                        </td>
+                        <td class="py-4 px-6">
+                            <button onclick="deleteProduct({{ product.id }})" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Delete</button>
+                        </td>
+                        <td class="py-4 px-6">
+                            <a href="{{ path('admin_edit', {id: product.id}) }}" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+
+        const deleteProduct = (id) => {
+            const formData = new FormData();
+            formData.append('id', id);
+
+            axios.post('admin/delete', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }).then(() => {
+                document.getElementById(`row-${id}`).remove();
+            })
+        }
+
+    </script>
+
+{% endblock %}

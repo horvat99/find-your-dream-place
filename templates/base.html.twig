@@ -6,6 +6,7 @@
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
         {# Run `composer require symfony/webpack-encore-bundle` to start using Symfony UX #}
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
@@ -15,6 +16,20 @@
         {% endblock %}
     </head>
     <body class="bg-gray-50 h-100">
-        {% block body %}{% endblock %}
+    <nav class="bg-white border-gray-200 border border-b-2 py-4 text-xl">
+        <div class="w-full md:w-auto">
+            <div class="flex flex-row justify-center space-x-6">
+                <a href={{ path('products_index') }}>Products</a>
+                {% if app.user is null %}
+                <a href={{ path('app_login') }}>Login</a>
+                <a href={{ path('app_register') }}>Register</a>
+                {% else %}
+                <a href={{ path('app_logout') }}>Logout</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    {{ render(path('show_warning')) }}
+    {% block body %}{% endblock %}
     </body>
 </html>

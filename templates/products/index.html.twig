@@ -6,6 +6,53 @@
     {% for flash_error in app.flashes('verify_email_error') %}
         <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
     {% endfor %}
+    <div class="max-w-3xl mx-auto">
+        <div class="max-w-4xl space-y-6 my-16 mx-auto">
+            <h1 class="text-center text-2xl">Which bike do you want to rent?</h1>
+            <form id="form" method="get" action="/products">
+                <div class="px-4 md:w-1/2 w-full mx-auto">
+                    <input type="text" value="{{ name }}" id="name" name="name" class="border border-gray-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="BMW">
+                    <button type="submit" class="w-full mt-2 text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Search</button>
+                    <select id="order" name="sort" class="w-full mt-2 text-white bg-primary-600 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                        {% if sort is same as null %}
+                         <option disabled selected>Sort by</option>
+                        {% endif %}
+                        <option class="bg-primary-400" value="speed_desc" {{ 'speed_desc' is same as sort ? 'selected' : '' }}>Max speed descending</option>
+                        <option class="bg-primary-400" value="speed_asc" {{ 'speed_asc' is same as sort ? 'selected' : '' }}>Max speed ascending</option>
+                        <option class="bg-primary-400" value="price_desc" {{ 'price_desc' is same as sort ? 'selected' : '' }}>Price descending</option>
+                        <option class="bg-primary-400" value="price_asc" {{ 'price_asc' is same as sort ? 'selected' : '' }}>Price ascending</option>
+                    </select>
+                </div>
+            </form>
 
-    <h1>Products</h1>
+            {% for product in products %}
+            <a href="{{ path('product_show', { id: product.id } )}}">
+                <div class="flex px-4 my-6">
+                    <div class="cursor-pointer bg-white p-6 pb-3 w-full border border-gray-600 overflow-hidden relative">
+                        <article class="flex flex-col-reverse md:flex-row justify-between gap-4 flex-1 mt-1">
+                                <div class="md:w-10/12 space-y-1">
+                                    <div class="font-bold text-xl leading-tight lg:pr-32">
+                                        {{ product.name }}
+                                    </div>
+                                    <div class="opacity-75 text-lg">Price: {{ product.price }}e/h</div>
+                                    <div class="opacity-75 text-lg">Max speed: {{ product.maxSpeed }}km/h</div>
+                                </div>
+                                <div class="flex items-center justify-start md:justify-end md:w-1/4 md:ml-8 mt-1">
+                                    <img src="/uploads/images/{{ product.filename }}" class="w-[125px] md:w-[150px] p-3 bg-white rounded-md" loading="lazy" alt="{{ product.filename }}">
+                                </div>
+                        </article>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('order').addEventListener('change', () => {
+            document.getElementById('form').submit();
+        })
+    </script>
 {% endblock %}
+

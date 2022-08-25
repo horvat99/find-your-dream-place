@@ -15,16 +15,19 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 
 class RegistrationController extends AbstractController
 {
     private EmailVerifier $emailVerifier;
+    private HttpClientInterface $client;
 
-    public function __construct(EmailVerifier $emailVerifier)
+    public function __construct(EmailVerifier $emailVerifier, HttpClientInterface $client)
     {
         $this->emailVerifier = $emailVerifier;
+        $this->client = $client;
     }
 
     #[Route('/register', name: 'app_register')]
@@ -34,7 +37,8 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('products_index');
         }
 
-        if ($request->getMethod() === "POST") {
+        if ($request->getMethod() === "POST" && $this->IsEmailAndPasswordValid($request)) {
+
             $user = new User();
             $user->setEmail($request->request->get('email'));
             // encode the plain password
@@ -51,7 +55,7 @@ class RegistrationController extends AbstractController
             // generate a signed url and email it to the user
             $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
                 (new TemplatedEmail())
-                    ->from(new Address('find-your-dream-place@gmail.com', 'find your dream place'))
+                    ->from(new Address('business.stuffs.email@gmail.com', 'Rent a bike'))
                     ->to($user->getEmail())
                     ->subject('Please Confirm your Email')
                     ->htmlTemplate('registration/confirmation_email.html.twig')
@@ -86,5 +90,26 @@ class RegistrationController extends AbstractController
         $this->addFlash('success', 'Your email address has been verified.');
 
         return $this->redirectToRoute('app_register');
+    }
+
+    private function IsEmailAndPasswordValid(Request $request): bool
+    {
+        $email = $request->request->get('email');
+        $password = $request->request->get('password');
+
+        if (strlen($password) < 8) {
+            $this->addFlash('success', 'Password is too short.');
+            return false;
+        }
+
+        $userWithGivenEmailAddress =
+            $this->client->request("GET", "{$this->getParameter('websiteUrl')}/api/users?email={$email}");
+
+        if ($userWithGivenEmailAddress->toArray()['hydra:totalItems'] > 0) {
+            $this->addFlash('success', 'Given email is taken.');
+            return false;
+        }
+
+        return true;
     }
 }
